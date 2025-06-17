@@ -18,6 +18,9 @@ if [[ ! -f opensearch-cluster.yml ]]; then
   exit 1
 fi
 
+# 모든 노드의 vm.max_map_count 재설정 데몬셋 적용
+kubectl apply -f opensearch-vmmp-daemonset.yml
+
 # 클러스터 정의 파일을 해당 네임스페이스로 적용
 kubectl apply -n $NAMESPACE -f opensearch-cluster.yml
 
