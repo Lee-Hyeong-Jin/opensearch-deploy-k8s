@@ -7,7 +7,7 @@ spec:
     version: 2.14.0
     httpPort: 9200
     vendor: opensearch
-    serviceName: my-cluster
+    serviceName: opensearch-cluster
     monitoring:
      enable: true
   dashboards:
@@ -16,11 +16,11 @@ spec:
     replicas: 1
     resources:
       requests:
-        memory: "2Gi"
-        cpu: "500m"
+         memory: "1Gi"
+         cpu: "500m"
       limits:
-        memory: "2Gi"
-        cpu: "500m"
+         memory: "1Gi"
+         cpu: "500m"
   confMgmt:
     smartScaler: true
   nodePools:
@@ -29,9 +29,8 @@ spec:
         enable: true
         minAvailable: 1
       replicas: 3
-      persistence:
-        size: "20Gi"
-        storageClass: "standard"
+      diskSize: "50Gi"
+      nodeSelector:
       resources:
          requests:
             memory: "2Gi"
@@ -41,12 +40,11 @@ spec:
             cpu: "500m"
       roles:
         - "cluster_manager"
-
-    - component: data
+        - "data"
+    - component: nodes
       replicas: 3
-      persistence:
-        size: "100Gi"
-        storageClass: "standard"
+      diskSize: "100Gi"
+      nodeSelector:
       resources:
          requests:
             memory: "4Gi"
@@ -56,11 +54,10 @@ spec:
             cpu: "1000m"
       roles:
         - "data"
-    - component: ingest
+    - component: coordinators
       replicas: 3
-      persistence:
-        size: "30Gi"
-        storageClass: "standard"
+      diskSize: "30Gi"
+      nodeSelector:
       resources:
          requests:
             memory: "2Gi"
