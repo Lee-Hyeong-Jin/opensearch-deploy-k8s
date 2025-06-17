@@ -1,0 +1,83 @@
+apiVersion: opensearch.opster.io/v1
+kind: OpenSearchCluster
+metadata:
+  name: opensearch-cluster
+spec:
+  security:
+    config:
+      enable: true
+    tls:
+      http:
+        generate: true
+      transport:
+        generate: true
+        perNode: true
+
+  general:
+    httpPort: 9200
+    serviceName: opensearch-cluster
+    version: 2.14.0
+    pluginsList: ["repository-s3", "analysis-nori"]
+    drainDataNodes: true
+    additionalConfig:
+      cluster.max_shards_per_node: "5000"
+      node.store.allow_mmap: false
+
+  dashboards:
+    enable: true
+    version: 2.14.0
+    replicas: 2
+    tls:
+      enable: true
+      generate: true
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+
+  nodePools:
+    - component: cluster-manager
+      replicas: 3
+      roles: ["cluster_manager"]
+      resources:
+        requests:
+          memory: "2Gi"
+          cpu: "500m"
+        limits:
+          memory: "4Gi"
+          cpu: "1000m"
+      persistence:
+        storageClass: "standard" # 수정 필요
+        size: 20Gi
+
+    - component: data-nodes
+      replicas: 3
+      roles: ["data"]
+      resources:
+        requests:
+          memory: "4Gi"
+          cpu: "1000m"
+        limits:
+          memory: "8Gi"
+          cpu: "2000m"
+      persistence:
+        storageClass: "standard" # 수정 필요
+        size: 500Gi
+
+    - component: ingest-nodes
+      replicas: 2
+      roles: ["ingest"]
+      resources:
+        requests:
+          memory: "2Gi"
+          cpu: "500m"
+        limits:
+          memory: "4Gi"
+          cpu: "1000m"
+      persistence:
+        storageClass: "standard" # 수정 필요
+        size: 20Gi
+
