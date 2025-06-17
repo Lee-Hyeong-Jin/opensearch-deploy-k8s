@@ -3,81 +3,70 @@ kind: OpenSearchCluster
 metadata:
   name: opensearch-cluster
 spec:
-  security:
-    config:
-      enable: true
-    tls:
-      http:
-        generate: true
-      transport:
-        generate: true
-        perNode: true
-
   general:
+    version: 2.14.0
     httpPort: 9200
-    serviceName: opensearch-cluster
-    version: 2.14.0
-    pluginsList: ["repository-s3", "analysis-nori"]
-    drainDataNodes: true
-    additionalConfig:
-      cluster.max_shards_per_node: "5000"
-      node.store.allow_mmap: false
-
+    vendor: opensearch
+    serviceName: my-cluster
+    monitoring:
+     enable: true
   dashboards:
-    enable: true
     version: 2.14.0
-    replicas: 2
-    tls:
-      enable: true
-      generate: true
+    enable: true
+    replicas: 1
     resources:
       requests:
-        memory: "512Mi"
-        cpu: "250m"
-      limits:
-        memory: "1Gi"
+        memory: "2Gi"
         cpu: "500m"
-
+      limits:
+        memory: "2Gi"
+        cpu: "500m"
+  confMgmt:
+    smartScaler: true
   nodePools:
-    - component: cluster-manager
+    - component: masters
+      pdb:
+        enable: true
+        minAvailable: 1
       replicas: 3
-      roles: ["cluster_manager"]
-      resources:
-        requests:
-          memory: "2Gi"
-          cpu: "500m"
-        limits:
-          memory: "4Gi"
-          cpu: "1000m"
       persistence:
-        storageClass: "standard" # 수정 필요
-        size: 20Gi
+        size: "20Gi"
+        storageClass: "standard"
+      resources:
+         requests:
+            memory: "2Gi"
+            cpu: "500m"
+         limits:
+            memory: "2Gi"
+            cpu: "500m"
+      roles:
+        - "cluster_manager"
 
-    - component: data-nodes
+    - component: data
       replicas: 3
-      roles: ["data"]
-      resources:
-        requests:
-          memory: "4Gi"
-          cpu: "1000m"
-        limits:
-          memory: "8Gi"
-          cpu: "2000m"
       persistence:
-        storageClass: "standard" # 수정 필요
-        size: 500Gi
-
-    - component: ingest-nodes
-      replicas: 2
-      roles: ["ingest"]
+        size: "100Gi"
+        storageClass: "standard"
       resources:
-        requests:
-          memory: "2Gi"
-          cpu: "500m"
-        limits:
-          memory: "4Gi"
-          cpu: "1000m"
+         requests:
+            memory: "4Gi"
+            cpu: "1000m"
+         limits:
+            memory: "4Gi"
+            cpu: "1000m"
+      roles:
+        - "data"
+    - component: ingest
+      replicas: 3
       persistence:
-        storageClass: "standard" # 수정 필요
-        size: 20Gi
-
+        size: "30Gi"
+        storageClass: "standard"
+      resources:
+         requests:
+            memory: "2Gi"
+            cpu: "500m"
+         limits:
+            memory: "2Gi"
+            cpu: "500m"
+      roles:
+        - "ingest"
